@@ -110,6 +110,29 @@ html,body{height:100%;font-family:'Nunito',sans-serif;overflow:hidden;background
 .w-btn{background:var(--gold);color:#1a2456;border:none;border-radius:50px;padding:18px 52px;font-size:1.25rem;font-weight:800;font-family:'Baloo 2',sans-serif;cursor:pointer;box-shadow:0 8px 30px rgba(255,217,77,0.45);animation:w-pop 2s ease infinite;margin-top:4px}
 @keyframes w-pop{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 .w-btn:active{transform:scale(0.94)}
+
+/* ── AGENDA ── */
+#agenda{position:fixed;inset:0;z-index:90;background:linear-gradient(180deg,#0e1530,#060a18);display:none;flex-direction:column;padding:0}
+#agenda.open{display:flex}
+.ag-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(109,132,245,0.2);flex-shrink:0}
+.ag-t{font-family:'Baloo 2',sans-serif;font-size:1.3rem;font-weight:800;color:var(--gold)}
+.ag-x{background:rgba(255,255,255,0.08);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:1.1rem;cursor:pointer}
+.ag-body{flex:1;overflow-y:auto;padding:16px 20px}
+.ag-note{background:rgba(109,132,245,0.1);border:1px solid rgba(109,132,245,0.25);border-radius:14px;padding:12px 14px;font-size:0.8rem;color:var(--txt2);line-height:1.6;margin-bottom:16px}
+.ct-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.ct-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(145deg,#6d84f5,#3d4fc4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:#fff;flex-shrink:0}
+.ct-info{flex:1}
+.ct-nome{font-size:0.98rem;font-weight:700;color:var(--txt)}
+.ct-tel{font-size:0.78rem;color:var(--txt3);margin-top:2px}
+.ct-del{background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:0.6;padding:6px}
+.ct-vazio{color:var(--txt3);font-size:0.88rem;text-align:center;padding:24px 12px;line-height:1.6}
+.ag-form{padding:16px 20px 24px;border-top:1px solid rgba(109,132,245,0.2);flex-shrink:0;background:rgba(10,13,31,0.6)}
+.ag-in{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(109,132,245,0.3);border-radius:12px;padding:14px 16px;color:#fff;font-size:1rem;font-family:inherit;margin-bottom:10px;outline:none}
+.ag-in:focus{border-color:var(--gold)}
+.ag-in::placeholder{color:var(--txt3)}
+.ag-btn{width:100%;background:var(--gold);color:#1a2456;border:none;border-radius:12px;padding:15px;font-size:1.05rem;font-weight:800;font-family:'Baloo 2',sans-serif;cursor:pointer}
+.ag-btn2{width:100%;background:rgba(255,255,255,0.08);color:var(--txt2);border:1px solid rgba(109,132,245,0.3);border-radius:12px;padding:13px;font-size:0.92rem;font-weight:700;font-family:inherit;cursor:pointer;margin-top:8px}
+.hdr-ct{background:rgba(255,255,255,0.08);border:1px solid rgba(109,132,245,0.25);color:var(--ac2);border-radius:20px;padding:6px 14px;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body>
@@ -152,7 +175,7 @@ html,body{height:100%;font-family:'Nunito',sans-serif;overflow:hidden;background
 <div id="app">
   <div class="hdr">
     <div class="hdr-logo">Chico</div>
-    <div class="hdr-status">Ativo e ouvindo</div>
+    <button class="hdr-ct" onclick="abrirContatos()">📇 Contatos</button>
   </div>
 
   <div class="stage">
@@ -225,212 +248,579 @@ html,body{height:100%;font-family:'Nunito',sans-serif;overflow:hidden;background
   </div>
 </div>
 
-<script>
-/* ══════ ESTRELAS ══════ */
-(function(){
-  var c=document.getElementById('stars');
-  for(var i=0;i<55;i++){
-    var el=document.createElement('div');el.className='s';
-    var sz=(Math.random()*2.2+0.8).toFixed(1);
-    var dl=(Math.random()*4).toFixed(2);
-    var dur=(Math.random()*3+2).toFixed(1);
-    el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;--d:'+dur+'s;--dl:'+dl+'s';
-    c.appendChild(el);
-  }
-})();
 
-/* ══════ REFS ══════ */
+<!-- AGENDA -->
+<div id="agenda">
+  <div class="ag-hdr">
+    <div class="ag-t">📇 Meus Contatos</div>
+    <button class="ag-x" onclick="fecharContatos()">✕</button>
+  </div>
+  <div class="ag-body">
+    <div class="ag-note">💡 Cadastre os contatos aqui e depois é só falar:<br><b>"Manda mensagem pra Mãe dizendo que estou chegando"</b><br><b>"Liga pro João no WhatsApp"</b></div>
+    <div id="listaCt"></div>
+  </div>
+  <div class="ag-form">
+    <input class="ag-in" id="inNome" placeholder="Nome (ex: Mãe, João, Médico)" />
+    <input class="ag-in" id="inTel" type="tel" placeholder="Número com DDD (ex: 61999998888)" />
+    <button class="ag-btn" onclick="addContato()">SALVAR CONTATO</button>
+    <button class="ag-btn2" onclick="importarAgenda()">📱 Importar da agenda do celular</button>
+  </div>
+</div>
+<script>
+/* ═══════════════════════════════════════════
+   CHICO — CÉREBRO v2
+   Interpretador: AÇÃO + ALVO + PARÂMETRO
+   ═══════════════════════════════════════════ */
+
+/* ── ESTRELAS ── */
+(function(){var c=document.getElementById('stars');for(var i=0;i<55;i++){var el=document.createElement('div');el.className='s';var sz=(Math.random()*2.2+0.8).toFixed(1);el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;--d:'+(Math.random()*3+2).toFixed(1)+'s;--dl:'+(Math.random()*4).toFixed(2)+'s';c.appendChild(el);}})();
+
+/* ── REFS ── */
 var bal=document.getElementById('bal');
 var mouth=document.getElementById('mouth');
 var eL=document.getElementById('eL'),eR=document.getElementById('eR');
-var pw=document.getElementById('pw');
-var st=document.getElementById('app'); // usaremos o stage via classe no #app não, criaremos classe no stage
 var stage={el:document.querySelector('.stage')};
 var mTimer=null;
 
-/* ══════ MODO ══════ */
-function modo(m){
-  stage.el.className='stage'+(m?' st-'+m:'');
+/* ── AGENDA ── */
+var contatos=JSON.parse(localStorage.getItem('chico_contatos')||'[]');
+function salvarContatos(){localStorage.setItem('chico_contatos',JSON.stringify(contatos));}
+
+/* ── ANIMAÇÃO ── */
+function modo(m){stage.el.className='stage'+(m?' st-'+m:'');}
+setInterval(function(){if(Math.random()>0.35){eL.style.transform='scaleY(0.07)';eR.style.transform='scaleY(0.07)';eL.style.transformOrigin='92px 96px';eR.style.transformOrigin='148px 96px';eL.style.transition='transform 0.07s';eR.style.transition='transform 0.07s';setTimeout(function(){eL.style.transform='';eR.style.transform='';eL.style.transition='';eR.style.transition='';},140);}},2800);
+var bocaA=['M 96 118 Q 120 142 144 118 Q 120 130 96 118','M 104 120 Q 120 138 136 120 Q 120 128 104 120','M 102 122 Q 120 140 138 122 Q 120 130 102 122'];
+function bocaTalk(on){if(mTimer){clearInterval(mTimer);mTimer=null;}
+if(on){var s=0;mTimer=setInterval(function(){s=(s+1)%3;mouth.setAttribute('d',bocaA[s]);mouth.setAttribute('fill','#5ee8ff');},145);}
+else{mouth.setAttribute('d','M 100 122 Q 120 134 140 122');mouth.setAttribute('fill','none');}}
+
+/* ── VOZ ── */
+function bestVoice(){var v=window.speechSynthesis.getVoices();var pf=['google português do brasil','luciana','francisca','pt-br'];
+for(var p=0;p<pf.length;p++)for(var i=0;i<v.length;i++){if(v[i].lang.toLowerCase().indexOf('pt')===0&&v[i].name.toLowerCase().indexOf(pf[p])>=0)return v[i];}
+for(var i=0;i<v.length;i++)if(v[i].lang.toLowerCase().indexOf('pt')===0)return v[i];return null;}
+function falar(t,cb){bal.textContent=t;if(!('speechSynthesis'in window)){if(cb)cb();return;}
+window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';u.pitch=1.65;u.rate=1.05;var v=bestVoice();if(v)u.voice=v;
+modo('talking');bocaTalk(true);
+u.onend=function(){bocaTalk(false);modo('');if(cb)cb();};
+u.onerror=function(){bocaTalk(false);modo('');if(cb)cb();};
+window.speechSynthesis.speak(u);}
+
+/* ── ESCUTA ── */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var rec=null,ouvindo=false,pausado=false;
+function ouvir(){if(!SR||ouvindo||pausado)return;
+try{rec=new SR();rec.lang='pt-BR';rec.interimResults=true;rec.maxAlternatives=1;
+rec.onstart=function(){ouvindo=true;modo('hearing');bal.textContent='Estou te ouvindo... 👂';};
+rec.onresult=function(e){var t='';for(var i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)t+=e.results[i][0].transcript;else bal.textContent='"'+e.results[i][0].transcript+'"';}
+if(t){pararOuvir();processar(t.trim());}};
+rec.onerror=function(){pararOuvir();if(!pausado)setTimeout(ouvir,2500);};
+rec.onend=function(){if(ouvindo){pararOuvir();if(!pausado)setTimeout(ouvir,1200);}};
+rec.start();}catch(e){setTimeout(ouvir,3000);}}
+function pararOuvir(){ouvindo=false;if(rec){try{rec.stop();}catch(e){}rec=null;}}
+function toquePuppet(){if(!ouvindo){var f=['Oi! Pode falar!','Estou aqui!','Me chama!','Pode falar comigo!'];falar(f[Math.floor(Math.random()*f.length)],function(){setTimeout(ouvir,600);});}}
+function cmd(t){pararOuvir();processar(t);}
+function retomar(){setTimeout(ouvir,900);}
+
+/* ═══════════════════════════════════════════
+   NORMALIZAÇÃO
+   ═══════════════════════════════════════════ */
+function norm(s){
+  return s.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ').trim();
 }
 
-/* ══════ PISCAR OLHOS ══════ */
-setInterval(function(){
-  if(Math.random()>0.35){
-    eL.style.transform='scaleY(0.07)';eR.style.transform='scaleY(0.07)';
-    eL.style.transformOrigin='92px 96px';eR.style.transformOrigin='148px 96px';
-    eL.style.transition='transform 0.07s';eR.style.transition='transform 0.07s';
-    setTimeout(function(){eL.style.transform='';eR.style.transform='';eL.style.transition='';eR.style.transition='';},140);
-  }
-},2800);
-
-/* ══════ BOCA ══════ */
-var bocaAberta=['M 96 118 Q 120 142 144 118 Q 120 130 96 118','M 104 120 Q 120 138 136 120 Q 120 128 104 120','M 102 122 Q 120 140 138 122 Q 120 130 102 122'];
-var bocaF='M 100 122 Q 120 134 140 122';
-function bocaTalk(on){
-  if(mTimer){clearInterval(mTimer);mTimer=null;}
-  if(on){
-    var s=0;
-    mTimer=setInterval(function(){
-      s=(s+1)%bocaAberta.length;
-      mouth.setAttribute('d',bocaAberta[s]);
-      mouth.setAttribute('fill','#5ee8ff');
-    },145);
-  } else {
-    mouth.setAttribute('d',bocaF);
-    mouth.setAttribute('fill','none');
-  }
+/* Remove verbos de abertura no começo */
+function limpar(s){
+  return s.replace(/^(?:por favor\s+)?(?:chico[,\s]+)?(?:voce pode\s+|pode\s+|quero\s+|queria\s+|gostaria de\s+)?/i,'').trim();
 }
 
-/* ══════ VOZ PIXAR ══════ */
-function bestVoice(){
-  var v=window.speechSynthesis.getVoices();
-  var pref=['google português do brasil','luciana','francisca','pt-br'];
-  for(var p=0;p<pref.length;p++){
-    for(var i=0;i<v.length;i++){
-      if(v[i].lang.toLowerCase().indexOf('pt')===0&&v[i].name.toLowerCase().indexOf(pref[p])>=0)return v[i];
+/* ═══════════════════════════════════════════
+   BUSCA DE CONTATO
+   ═══════════════════════════════════════════ */
+function acharContato(txt){
+  var n=norm(txt);
+  var achado=null,maiorLen=0;
+  for(var i=0;i<contatos.length;i++){
+    var nome=norm(contatos[i].nome);
+    // procura o nome como palavra inteira
+    var re=new RegExp('(?:^|\\s)'+nome.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\s|$|,|\\.)');
+    if(re.test(n)&&nome.length>maiorLen){achado=contatos[i];maiorLen=nome.length;}
+  }
+  return achado;
+}
+
+/* ═══════════════════════════════════════════
+   EXTRAÇÃO DE MENSAGEM
+   "manda mensagem pra mãe dizendo que estou chegando"
+   → "estou chegando"
+   ═══════════════════════════════════════════ */
+function extrairMensagem(orig){
+  var m=orig.match(/(?:dizendo(?:\s+que)?|falando(?:\s+que)?|avisando(?:\s+que)?|com\s+a\s+mensagem|escrito|escreve[r]?|mensagem[:\s]+|texto[:\s]+|que\s+diga|assim[:\s]+)\s+(.+)$/i);
+  if(m&&m[1])return m[1].trim().replace(/[.!?]+$/,'');
+  return '';
+}
+
+/* ═══════════════════════════════════════════
+   EXTRAÇÃO DE DESTINO
+   "chama um uber para o shopping"  → "o shopping"
+   ═══════════════════════════════════════════ */
+function extrairDestino(orig){
+  var m=orig.match(/(?:para|pra|pro|ate|at[eé]|rumo a|com destino a|no|na|em)\s+(?:o\s+|a\s+|os\s+|as\s+)?(.+)$/i);
+  if(m&&m[1]){
+    var d=m[1].trim()
+      .replace(/^(?:o|a|os|as|um|uma)\s+/i,'')
+      .replace(/[.!?]+$/,'');
+    return d;
+  }
+  return '';
+}
+
+/* ═══════════════════════════════════════════
+   EXTRAÇÃO DE BUSCA
+   "entra no youtube e pesquisa video de forró"
+   → "video de forró"
+   ═══════════════════════════════════════════ */
+function extrairBusca(orig,app){
+  var s=orig;
+  // remove tudo até o verbo de busca
+  var re=new RegExp('.*?(?:pesquis(?:a|ar|e)|busc(?:a|ar|e)|procur(?:a|ar|e)|acha[r]?|toca[r]?|coloca[r]?|poe|bota[r]?|assisti[r]?|ver|ouvi[r]?|escuta[r]?)\\s+(?:um\\s+|uma\\s+|o\\s+|a\\s+)?(?:video\\s+(?:de\\s+|do\\s+|da\\s+|sobre\\s+)?|musica\\s+(?:de\\s+|do\\s+|da\\s+)?|filme\\s+(?:de\\s+|do\\s+|da\\s+)?|serie\\s+(?:de\\s+|do\\s+|da\\s+)?)?','i');
+  if(re.test(s)){
+    var r=s.replace(re,'').trim();
+    // remove menção ao app no final ou começo
+    if(app){r=r.replace(new RegExp('(?:^|\\s)(?:no|na|do|da|pelo|pela)?\\s*'+app+'\\s*','ig'),' ').trim();}
+    r=r.replace(/^(?:no|na|do|da|de|em|sobre)\s+/i,'').replace(/[.!?]+$/,'').trim();
+    if(r)return r;
+  }
+  // fallback: remove o nome do app e verbos de abrir
+  var f=s.replace(new RegExp('(?:abri[r]?|abre|entra[r]?|vai\\s+(?:no|na)|acessa[r]?|liga[r]?)\\s*','ig'),' ');
+  if(app)f=f.replace(new RegExp('(?:no|na|do|da|o|a)?\\s*'+app,'ig'),' ');
+  f=f.replace(/\s+e\s+/ig,' ').replace(/\s+/g,' ').trim();
+  return f;
+}
+
+/* ═══════════════════════════════════════════
+   ABRIR LINK
+   ═══════════════════════════════════════════ */
+function abrir(url){
+  pausado=true;
+  pararOuvir();
+  try{
+    var a=document.createElement('a');
+    a.href=url;a.target='_blank';a.rel='noopener';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);
+  }catch(e){window.location.href=url;}
+  setTimeout(function(){pausado=false;},4000);
+}
+
+/* ═══════════════════════════════════════════
+   INTERPRETADOR PRINCIPAL
+   ═══════════════════════════════════════════ */
+function processar(txt){
+  var orig=limpar(txt);
+  var c=norm(orig);
+  var r='',url='',espera=1400;
+
+  /* ─────── CONTATOS: cadastrar por voz ─────── */
+  if(/^(?:adicionar?|cadastra[r]?|salva[r]?|guarda[r]?)\s+(?:o\s+|um\s+)?contato/i.test(c)){
+    abrirContatos();
+    r='Abri a agenda! Digite o nome e o número do contato.';
+    falar(r,retomar);return;
+  }
+  if(/^(?:abrir?|ver|mostra[r]?)\s+(?:meus\s+)?contatos|^agenda$|^contatos$/i.test(c)){
+    abrirContatos();
+    r='Aqui está sua agenda de contatos!';
+    falar(r,retomar);return;
+  }
+
+  var contato=acharContato(orig);
+
+  /* ═══════ WHATSAPP ═══════ */
+  if(/whatsapp|whats|zap\b|wpp/.test(c)||(contato&&/mensagem|manda|envia|escreve|liga|chama|fala/.test(c))){
+
+    var querMensagem=/mensagem|manda[r]?|envia[r]?|escreve[r]?|texto|dizendo|falando|avisa[r]?/.test(c);
+    var querLigar=/liga[r]?|ligue|chama[r]?|chamada|video ?chamada|audio/.test(c);
+
+    if(contato){
+      var msg=extrairMensagem(orig);
+      var tel=contato.tel.replace(/\D/g,'');
+
+      if(querLigar&&!querMensagem){
+        r='Ligando para '+contato.nome+'! Toque no ícone de telefone lá em cima.';
+        url='https://wa.me/'+tel;
+      }
+      else if(msg){
+        r='Mensagem para '+contato.nome+' pronta! Toque no botão verde de enviar, no canto de baixo à direita.';
+        url='https://wa.me/'+tel+'?text='+encodeURIComponent(msg);
+        espera=2600;
+      }
+      else if(querMensagem){
+        // Perguntar a mensagem
+        falar('O que você quer dizer para '+contato.nome+'?',function(){
+          esperarMensagem(contato);
+        });
+        return;
+      }
+      else{
+        r='Abrindo conversa com '+contato.nome+'!';
+        url='https://wa.me/'+tel;
+      }
+    }
+    else{
+      // Tentou falar um nome mas não achou?
+      var poss=orig.match(/(?:para|pra|pro|com)\s+(?:o\s+|a\s+)?([A-Za-zÀ-ú]+)/i);
+      if(poss&&poss[1]&&poss[1].length>2&&!/whatsapp|whats|zap|wpp|mensagem/i.test(poss[1])){
+        r='Não achei "'+poss[1]+'" na agenda. Vou abrir os contatos pra você cadastrar!';
+        falar(r,function(){abrirContatos();retomar();});
+        return;
+      }
+      r='Abrindo WhatsApp!';
+      url='https://wa.me/';
     }
   }
-  for(var i=0;i<v.length;i++){if(v[i].lang.toLowerCase().indexOf('pt-br')===0)return v[i];}
-  for(var i=0;i<v.length;i++){if(v[i].lang.toLowerCase().indexOf('pt')===0)return v[i];}
-  return null;
-}
 
-function falar(t,cb){
-  bal.textContent=t;
-  if(!('speechSynthesis' in window)){if(cb)cb();return;}
-  window.speechSynthesis.cancel();
-  var u=new SpeechSynthesisUtterance(t);
-  u.lang='pt-BR';
-  u.pitch=1.65;  // VOZ DE CRIANÇA MASCULINA
-  u.rate=1.05;
-  var v=bestVoice();if(v)u.voice=v;
-  modo('talking');bocaTalk(true);
-  u.onend=function(){bocaTalk(false);modo('');if(cb)cb();};
-  u.onerror=function(){bocaTalk(false);modo('');if(cb)cb();};
-  window.speechSynthesis.speak(u);
-}
-
-/* ══════ RECONHECIMENTO ══════ */
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-var rec=null,ouvindo=false;
-
-function ouvir(){
-  if(!SR||ouvindo)return;
-  try{
-    rec=new SR();rec.lang='pt-BR';rec.interimResults=true;rec.maxAlternatives=1;
-    rec.onstart=function(){ouvindo=true;modo('hearing');bal.textContent='Estou te ouvindo... 👂';};
-    rec.onresult=function(e){
-      var t='';
-      for(var i=e.resultIndex;i<e.results.length;i++){
-        if(e.results[i].isFinal)t+=e.results[i][0].transcript;
-        else bal.textContent='"'+e.results[i][0].transcript+'"';
-      }
-      if(t){pararOuvir();processar(t.trim());}
-    };
-    rec.onerror=function(){pararOuvir();setTimeout(ouvir,2500);};
-    rec.onend=function(){if(ouvindo){pararOuvir();setTimeout(ouvir,1200);}};
-    rec.start();
-  }catch(e){setTimeout(ouvir,3000);}
-}
-
-function pararOuvir(){
-  ouvindo=false;
-  if(rec){try{rec.stop();}catch(e){}rec=null;}
-}
-
-function toquePuppet(){
-  if(!ouvindo&&!pw._falando){
-    var frases=['Oi! Pode falar!','Estou aqui!','Me chama! 😄','Pode falar comigo!'];
-    falar(frases[Math.floor(Math.random()*frases.length)],function(){setTimeout(ouvir,600);});
+  /* ═══════ LIGAÇÃO TELEFÔNICA ═══════ */
+  else if(/^(?:liga[r]?|ligue|disca[r]?|telefona[r]?|chama[r]?)\s/.test(c)&&contato){
+    r='Ligando para '+contato.nome+'!';
+    url='tel:'+contato.tel.replace(/\D/g,'');
   }
-}
+  else if(/^(?:liga[r]?|disca[r]?|telefona[r]?)\s.*\d{8,}/.test(c)){
+    var num=orig.replace(/\D/g,'');
+    r='Ligando para '+num+'!';
+    url='tel:'+num;
+  }
 
-function cmd(t){pararOuvir();processar(t);}
+  /* ═══════ YOUTUBE ═══════ */
+  else if(/youtube|you tube|yotube|utube/.test(c)){
+    var q=extrairBusca(orig,'you ?tube');
+    var ehMusica=/musica|music|som|cancao|toca[r]?|escuta[r]?|ouvi[r]?/.test(c);
 
-/* ══════ PROCESSADOR ══════ */
-function processar(txt){
-  var c=txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  var r='',url='';
+    if(q){
+      if(ehMusica){
+        r='Tocando "'+q+'" no YouTube Music!';
+        url='https://music.youtube.com/search?q='+encodeURIComponent(q);
+      }else{
+        r='Pesquisando "'+q+'" no YouTube!';
+        url='https://www.youtube.com/results?search_query='+encodeURIComponent(q);
+      }
+    }else{
+      r='Abrindo YouTube!';
+      url='https://www.youtube.com/';
+    }
+  }
 
-  if(c.indexOf('youtube')>=0){var q=txt.replace(/.*youtube\s*(music\s*)?(e\s*)?(pesquis[ae]|toca[r]?|busca[r]?|play)?\s*/i,'').trim();if(c.indexOf('music')>=0||c.indexOf('musica')>=0){r='Vou tocar "'+(q||'músicas')+'" pra você!';url='https://music.youtube.com/search?q='+encodeURIComponent(q||'musicas');}else{r='Procurando "'+(q||'vídeos')+'" no YouTube!';url='https://www.youtube.com/results?search_query='+encodeURIComponent(q||'');}}
-  else if(c.indexOf('spotify')>=0){var q=txt.replace(/.*spotify\s*(e\s*)?(toca[r]?|play|busca[r]?)?\s*/i,'').trim();r=q?'Tocando "'+q+'" no Spotify!':'Abrindo Spotify!';url=q?'https://open.spotify.com/search/'+encodeURIComponent(q):'https://open.spotify.com';}
-  else if(c.indexOf('whatsapp')>=0||c.indexOf('zap')>=0){var n=extrairNome(txt,c);r=n?'Abrindo WhatsApp para '+n+'!':'Abrindo WhatsApp!';url='https://wa.me/';}
-  else if(c.indexOf('instagram')>=0){r='Abrindo Instagram!';url='https://www.instagram.com/';}
-  else if(c.indexOf('facebook')>=0){r='Abrindo Facebook!';url='https://www.facebook.com/';}
-  else if(c.indexOf('tiktok')>=0){var q=txt.replace(/.*tiktok\s*(e\s*)?(busca[r]?)?\s*/i,'').trim();r=q?'Pesquisando "'+q+'" no TikTok!':'Abrindo TikTok!';url=q?'https://www.tiktok.com/search?q='+encodeURIComponent(q):'https://www.tiktok.com/';}
-  else if(c.indexOf('netflix')>=0){var q=txt.replace(/.*netflix\s*(e\s*)?(busca[r]?|assisti[r]?)?\s*/i,'').trim();r=q?'Procurando "'+q+'" na Netflix!':'Abrindo Netflix!';url=q?'https://www.netflix.com/search?q='+encodeURIComponent(q):'https://www.netflix.com/';}
-  else if(c.indexOf('ifood')>=0||c.indexOf('pedir comida')>=0){var q=txt.replace(/.*?(ifood|pedir comida)\s*(e\s*)?(busca[r]?|pedir)?\s*/i,'').trim();r=q?'Que fome! Procurando "'+q+'"!':'Abrindo iFood!';url=q?'https://www.ifood.com.br/busca?term='+encodeURIComponent(q):'https://www.ifood.com.br/';}
-  else if(c.indexOf('uber')>=0){r='Chamando o Uber!';url='https://m.uber.com/ul/';}
-  else if(c.indexOf('waze')>=0){var d=txt.replace(/.*waze\s*(e\s*)?(ir\s+at[eé]|para)?\s*/i,'').trim();r='Abrindo Waze'+(d?' para "'+d+'"':'')+'!';url='https://waze.com/ul?q='+encodeURIComponent(d)+'&navigate=yes';}
-  else if(c.indexOf('navegar')>=0||c.indexOf('como chegar')>=0||c.indexOf('onde fica')>=0||c.indexOf('maps')>=0||c.indexOf('rota')>=0){var d=txt.replace(/(abrir?\s*maps?\s*e?\s*)?(navegar?\s*at[eé]\s*|como\s+chegar\s+(at[eé]\s*)?|onde\s+fica\s+|ir\s+(at[eé]\s*)?|rota\s+para\s*)/i,'').trim();r='Te levando até "'+(d||'lá')+'", um momento!';url='https://maps.google.com/maps?q='+encodeURIComponent(d);}
-  else if(c.indexOf('google')>=0||c.indexOf('pesquis')>=0||c.indexOf('busca')>=0){var q=txt.replace(/(pesquis[ae]?\s*(no\s*google)?\s*)|(abrir?\s*google\s*(e\s*)?pesquis[ae]?\s*)/i,'').trim();r='Pesquisando "'+(q||txt)+'" no Google!';url='https://www.google.com/search?q='+encodeURIComponent(q||txt);}
-  else if(c.indexOf('gmail')>=0||c.indexOf('email')>=0){r='Abrindo seus e-mails!';url='https://mail.google.com/';}
-  else if(c.indexOf('nubank')>=0){r='Abrindo Nubank!';url='https://app.nubank.com.br/';}
-  else if(c.indexOf('mercado livre')>=0){var q=txt.replace(/.*mercado\s*livre\s*(e\s*)?(busca[r]?)?\s*/i,'').trim();r=q?'Procurando "'+q+'" no Mercado Livre!':'Abrindo Mercado Livre!';url=q?'https://lista.mercadolivre.com.br/'+encodeURIComponent(q.replace(/ /g,'-')):'https://www.mercadolivre.com.br/';}
-  else if(c.indexOf('amazon')>=0){var q=txt.replace(/.*amazon\s*(e\s*)?(busca[r]?)?\s*/i,'').trim();r=q?'Procurando "'+q+'" na Amazon!':'Abrindo Amazon!';url=q?'https://www.amazon.com.br/s?k='+encodeURIComponent(q):'https://www.amazon.com.br/';}
-  else if(c.indexOf('telegram')>=0){r='Abrindo Telegram!';url='https://web.telegram.org/';}
-  else if(c.indexOf('linkedin')>=0){r='Abrindo LinkedIn!';url='https://www.linkedin.com/';}
-  else if(c.indexOf('clima')>=0||c.indexOf('tempo')>=0||c.indexOf('chuva')>=0||c.indexOf('previsao')>=0){var l=txt.replace(/.*?(clima|tempo|previsao|chuva)\s*(de|em|para|hoje)?\s*/i,'').trim();r='Deixa eu ver o tempo'+(l?' em "'+l+'"':'')+'!';url='https://www.google.com/search?q=previsao+do+tempo+'+encodeURIComponent(l||'hoje');}
-  else if(c.indexOf('hora')>=0||c.indexOf('que horas')>=0){r='Agora são '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'!';}
-  else if(c.indexOf('data')>=0||c.indexOf('que dia')>=0||c.indexOf('hoje')>=0){r='Hoje é '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})+'!';}
-  else if(c.indexOf('bateria')>=0||c.indexOf('carga')>=0){
+  /* ═══════ UBER ═══════ */
+  else if(/uber/.test(c)){
+    var dest=extrairDestino(orig.replace(/.*uber\s*/i,''));
+    if(!dest)dest=extrairDestino(orig);
+    if(dest){
+      r='Chamando um Uber para "'+dest+'"! Confirme o pedido no app.';
+      url='https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff%5Bformatted_address%5D='+encodeURIComponent(dest);
+      espera=2400;
+    }else{
+      falar('Para onde você quer ir?',function(){esperarDestino('uber');});
+      return;
+    }
+  }
+
+  /* ═══════ 99 ═══════ */
+  else if(/\b99\b|noventa e nove/.test(c)){
+    r='Abrindo o 99!';
+    url='https://99app.com/';
+  }
+
+  /* ═══════ MAPS / NAVEGAÇÃO ═══════ */
+  else if(/navega[r]?|como chego|como chegar|onde fica|onde e|rota|caminho|maps|mapa|me leva|ir para|ir ate/.test(c)){
+    var dest=extrairDestino(orig);
+    if(!dest)dest=orig.replace(/.*(?:navega[r]?|como chegar|onde fica|rota|maps|mapa|me leva)\s*/i,'').trim();
+    if(dest){
+      r='Te levando até "'+dest+'"! Siga as instruções no mapa.';
+      url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+'&travelmode=driving';
+      espera=2200;
+    }else{
+      falar('Para onde você quer ir?',function(){esperarDestino('maps');});
+      return;
+    }
+  }
+
+  /* ═══════ WAZE ═══════ */
+  else if(/waze/.test(c)){
+    var dest=extrairDestino(orig.replace(/.*waze\s*/i,''))||extrairDestino(orig);
+    if(dest){
+      r='Abrindo Waze para "'+dest+'"!';
+      url='https://www.waze.com/ul?q='+encodeURIComponent(dest)+'&navigate=yes';
+    }else{
+      falar('Para onde no Waze?',function(){esperarDestino('waze');});return;
+    }
+  }
+
+  /* ═══════ SPOTIFY ═══════ */
+  else if(/spotify|spotfy/.test(c)){
+    var q=extrairBusca(orig,'spotify');
+    if(q){
+      r='Tocando "'+q+'" no Spotify!';
+      url='https://open.spotify.com/search/'+encodeURIComponent(q);
+    }else{r='Abrindo Spotify!';url='https://open.spotify.com/';}
+  }
+
+  /* ═══════ NETFLIX ═══════ */
+  else if(/netflix/.test(c)){
+    var q=extrairBusca(orig,'netflix');
+    if(q){r='Procurando "'+q+'" na Netflix!';url='https://www.netflix.com/search?q='+encodeURIComponent(q);}
+    else{r='Abrindo Netflix!';url='https://www.netflix.com/';}
+  }
+
+  /* ═══════ IFOOD ═══════ */
+  else if(/ifood|i food|pedir comida|delivery|pedir (?:uma |um )?(?:pizza|lanche|comida)/.test(c)){
+    var q=extrairBusca(orig,'i ?food');
+    if(!q){var mm=orig.match(/(?:pedir|quero|comprar)\s+(?:uma?\s+)?([a-zà-ú\s]+)/i);if(mm)q=mm[1].trim();}
+    q=q.replace(/\b(?:no|na|pelo|pela)\s*i ?food\b/ig,'').trim();
+    if(q){r='Procurando "'+q+'" no iFood!';url='https://www.ifood.com.br/busca?q='+encodeURIComponent(q);}
+    else{r='Abrindo iFood!';url='https://www.ifood.com.br/';}
+  }
+
+  /* ═══════ MERCADO LIVRE ═══════ */
+  else if(/mercado livre|mercadolivre|mercado libre/.test(c)){
+    var q=extrairBusca(orig,'mercado ?livre');
+    if(q){r='Procurando "'+q+'" no Mercado Livre!';url='https://lista.mercadolivre.com.br/'+encodeURIComponent(q.replace(/\s+/g,'-'));}
+    else{r='Abrindo Mercado Livre!';url='https://www.mercadolivre.com.br/';}
+  }
+
+  /* ═══════ AMAZON ═══════ */
+  else if(/amazon/.test(c)){
+    var q=extrairBusca(orig,'amazon');
+    if(q){r='Procurando "'+q+'" na Amazon!';url='https://www.amazon.com.br/s?k='+encodeURIComponent(q);}
+    else{r='Abrindo Amazon!';url='https://www.amazon.com.br/';}
+  }
+
+  /* ═══════ SHOPEE ═══════ */
+  else if(/shopee|shoppe/.test(c)){
+    var q=extrairBusca(orig,'shopee');
+    if(q){r='Procurando "'+q+'" na Shopee!';url='https://shopee.com.br/search?keyword='+encodeURIComponent(q);}
+    else{r='Abrindo Shopee!';url='https://shopee.com.br/';}
+  }
+
+  /* ═══════ INSTAGRAM ═══════ */
+  else if(/instagram|insta\b/.test(c)){
+    var perfil=orig.match(/(?:perfil|arroba|@)\s*(?:do|da|de)?\s*([a-z0-9._]+)/i);
+    if(perfil&&perfil[1]){r='Abrindo o perfil de '+perfil[1]+'!';url='https://www.instagram.com/'+perfil[1].replace(/[^a-z0-9._]/gi,'')+'/';}
+    else if(/reels?/.test(c)){r='Abrindo os Reels!';url='https://www.instagram.com/reels/';}
+    else{r='Abrindo Instagram!';url='https://www.instagram.com/';}
+  }
+
+  /* ═══════ FACEBOOK ═══════ */
+  else if(/facebook|face\b/.test(c)){
+    if(/marketplace/.test(c)){r='Abrindo o Marketplace!';url='https://www.facebook.com/marketplace/';}
+    else{r='Abrindo Facebook!';url='https://www.facebook.com/';}
+  }
+
+  /* ═══════ TIKTOK ═══════ */
+  else if(/tiktok|tik tok/.test(c)){
+    var q=extrairBusca(orig,'tik ?tok');
+    if(q){r='Pesquisando "'+q+'" no TikTok!';url='https://www.tiktok.com/search?q='+encodeURIComponent(q);}
+    else{r='Abrindo TikTok!';url='https://www.tiktok.com/';}
+  }
+
+  /* ═══════ TELEGRAM ═══════ */
+  else if(/telegram/.test(c)){r='Abrindo Telegram!';url='https://web.telegram.org/';}
+
+  /* ═══════ GMAIL ═══════ */
+  else if(/gmail|e ?mail|email/.test(c)){
+    if(/escreve[r]?|manda[r]?|envia[r]?|nov[oa]|compor/.test(c)){r='Abrindo um novo e-mail!';url='https://mail.google.com/mail/u/0/#inbox?compose=new';}
+    else{r='Abrindo seus e-mails!';url='https://mail.google.com/';}
+  }
+
+  /* ═══════ NUBANK ═══════ */
+  else if(/nubank|nu bank/.test(c)){r='Abrindo Nubank!';url='https://app.nubank.com.br/';}
+
+  /* ═══════ CLIMA ═══════ */
+  else if(/clima|tempo|chuva|chover|temperatura|previsao|calor|frio/.test(c)){
+    var loc=extrairDestino(orig)||'';
+    r='Vendo a previsão do tempo'+(loc?' em '+loc:'')+'!';
+    url='https://www.google.com/search?q=previsao+do+tempo+'+encodeURIComponent(loc||'hoje');
+  }
+
+  /* ═══════ HORA ═══════ */
+  else if(/que horas|hora agora|horas sao/.test(c)){
+    r='Agora são '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'!';
+  }
+
+  /* ═══════ DATA ═══════ */
+  else if(/que dia|data de hoje|hoje e dia|qual a data/.test(c)){
+    r='Hoje é '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})+'!';
+  }
+
+  /* ═══════ BATERIA ═══════ */
+  else if(/bateria|carga|energia/.test(c)){
     if(navigator.getBattery){
       navigator.getBattery().then(function(b){
-        falar('A bateria está em '+Math.round(b.level*100)+' por cento'+(b.charging?', e está carregando!':'!'),function(){setTimeout(ouvir,700);});
+        falar('A bateria está em '+Math.round(b.level*100)+' por cento'+(b.charging?', e está carregando!':'!'),retomar);
       });return;
-    }else{r='Não consegui ler a bateria aqui.';}
+    }
+    r='Não consegui ver a bateria aqui.';
   }
-  else if(c.indexOf('calcular')>=0||c.indexOf('quanto e')>=0){var ex=txt.replace(/.*?(calcular?|quanto e)\s*/i,'').trim();if(ex){try{var res=Function('"use strict"; return ('+ex.replace(/[^0-9+\-*/.() ]/g,'')+')')();r='A resposta é '+res+'!';}catch(e){r='Hmm, não entendi a conta. Tenta de novo!';}}else{r='Me fala a conta! Tipo: calcular 50 mais 30!';}}
-  else if(c.indexOf('obrigad')>=0||c.indexOf('valeu')>=0||c.indexOf('thank')>=0){r='De nada! Tô sempre aqui pra te ajudar! 💜';}
-  else if(c.indexOf('oi')===0||c.indexOf('ola')===0||c.indexOf('bom dia')>=0||c.indexOf('boa tarde')>=0||c.indexOf('boa noite')>=0){r='Oiii!! Que bom te ouvir! O que você quer fazer?';}
-  else if(c.indexOf('quem e voce')>=0||c.indexOf('seu nome')>=0||c.indexOf('como voce se chama')>=0){r='Eu sou o Chico! Seu amigo que te ajuda com o celular! 🤖';}
-  else{r='Hmm, não entendi bem. Tenta falar: "abrir YouTube", "navegar até a farmácia", ou "que horas são"!';}
+
+  /* ═══════ CALCULADORA ═══════ */
+  else if(/calcul|quanto (?:e|da|sao)|soma[r]?|multiplica|divide|subtrai/.test(c)){
+    var ex=orig.replace(/.*?(?:calcul(?:a|ar|e)|quanto (?:e|da|sao))\s*/i,'').trim();
+    ex=ex.replace(/\bmais\b/gi,'+').replace(/\bmenos\b/gi,'-').replace(/\bvezes\b/gi,'*').replace(/\b(?:dividido por|dividido)\b/gi,'/');
+    try{var res=Function('"use strict"; return ('+ex.replace(/[^0-9+\-*/.() ]/g,'')+')')();
+      if(res!==undefined&&!isNaN(res))r='A resposta é '+(Math.round(res*100)/100)+'!';
+      else r='Não entendi a conta. Fala assim: calcular 50 mais 30!';
+    }catch(e){r='Não entendi a conta. Fala assim: calcular 50 mais 30!';}
+  }
+
+  /* ═══════ GOOGLE (fallback de busca) ═══════ */
+  else if(/google|pesquis|busca[r]?|procur|o que e|quem e|quanto custa/.test(c)){
+    var q=extrairBusca(orig,'google');
+    if(!q)q=orig;
+    r='Pesquisando "'+q+'" no Google!';
+    url='https://www.google.com/search?q='+encodeURIComponent(q);
+  }
+
+  /* ═══════ SOCIAL ═══════ */
+  else if(/^(?:oi|ola|opa|e ai|bom dia|boa tarde|boa noite)/.test(c)){
+    var h=new Date().getHours();
+    var sd=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+    r=sd+'! Que bom te ouvir! O que você quer fazer?';
+  }
+  else if(/obrigad|valeu|brigad/.test(c)){r='De nada! Tô sempre aqui pra te ajudar! 💜';}
+  else if(/quem (?:e|es) voce|seu nome|como (?:voce )?se chama/.test(c)){r='Eu sou o Chico! Seu amigo que te ajuda com o celular!';}
+  else if(/tchau|ate logo|adeus|falou/.test(c)){r='Tchau! Quando precisar é só me chamar!';}
+
+  /* ═══════ NÃO ENTENDEU ═══════ */
+  else{
+    r='Não entendi. Tenta assim: "manda mensagem pra mãe dizendo que estou chegando", ou "pesquisa forró no YouTube", ou "chama um Uber para o shopping".';
+  }
 
   falar(r,function(){
-    if(url){setTimeout(function(){window.open(url,'_blank');},300);}
-    setTimeout(ouvir,800);
+    if(url){setTimeout(function(){abrir(url);},300);}
+    setTimeout(ouvir,espera);
   });
 }
 
-function extrairNome(orig,c){
-  var m=orig.match(/(?:para|pro|pra)\s+([A-ZÀ-Ú][a-zà-ú]+)/);
-  return m?m[1]:null;
+/* ═══════════════════════════════════════════
+   DIÁLOGOS DE SEGUIMENTO
+   ═══════════════════════════════════════════ */
+function esperarMensagem(contato){
+  if(!SR)return;
+  var r2=new SR();r2.lang='pt-BR';r2.interimResults=false;r2.maxAlternatives=1;
+  modo('hearing');bal.textContent='Fale a mensagem para '+contato.nome+'... 👂';
+  r2.onresult=function(e){
+    var msg=e.results[0][0].transcript.trim();
+    var tel=contato.tel.replace(/\D/g,'');
+    falar('Mensagem pronta para '+contato.nome+'! Toque no botão verde de enviar, no canto de baixo à direita.',function(){
+      abrir('https://wa.me/'+tel+'?text='+encodeURIComponent(msg));
+      setTimeout(ouvir,2800);
+    });
+  };
+  r2.onerror=function(){falar('Não ouvi. Tenta de novo!',retomar);};
+  try{r2.start();}catch(e){retomar();}
 }
 
-/* ══════ INÍCIO ══════ */
+function esperarDestino(app){
+  if(!SR)return;
+  var r2=new SR();r2.lang='pt-BR';r2.interimResults=false;r2.maxAlternatives=1;
+  modo('hearing');bal.textContent='Fale o destino... 👂';
+  r2.onresult=function(e){
+    var d=e.results[0][0].transcript.trim();
+    var url,r;
+    if(app==='uber'){r='Chamando Uber para "'+d+'"!';url='https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff%5Bformatted_address%5D='+encodeURIComponent(d);}
+    else if(app==='waze'){r='Abrindo Waze para "'+d+'"!';url='https://www.waze.com/ul?q='+encodeURIComponent(d)+'&navigate=yes';}
+    else{r='Te levando até "'+d+'"!';url='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(d)+'&travelmode=driving';}
+    falar(r,function(){abrir(url);setTimeout(ouvir,2600);});
+  };
+  r2.onerror=function(){falar('Não ouvi o destino. Tenta de novo!',retomar);};
+  try{r2.start();}catch(e){retomar();}
+}
+
+/* ═══════════════════════════════════════════
+   AGENDA — INTERFACE
+   ═══════════════════════════════════════════ */
+function abrirContatos(){
+  pausado=true;pararOuvir();
+  document.getElementById('agenda').classList.add('open');
+  renderContatos();
+}
+function fecharContatos(){
+  document.getElementById('agenda').classList.remove('open');
+  pausado=false;setTimeout(ouvir,600);
+}
+function renderContatos(){
+  var el=document.getElementById('listaCt');
+  if(!contatos.length){el.innerHTML='<div class="ct-vazio">Nenhum contato ainda.<br>Adicione abaixo para o Chico poder ligar e mandar mensagens!</div>';return;}
+  el.innerHTML=contatos.map(function(c,i){
+    return '<div class="ct-item"><div class="ct-av">'+c.nome.charAt(0).toUpperCase()+'</div>'+
+      '<div class="ct-info"><div class="ct-nome">'+c.nome+'</div><div class="ct-tel">'+c.tel+'</div></div>'+
+      '<button class="ct-del" onclick="removerContato('+i+')">🗑️</button></div>';
+  }).join('');
+}
+function addContato(){
+  var n=document.getElementById('inNome').value.trim();
+  var t=document.getElementById('inTel').value.trim();
+  if(!n||!t){alert('Preencha o nome e o número!');return;}
+  var tel=t.replace(/\D/g,'');
+  if(tel.length<10){alert('Número inválido. Use DDD + número. Ex: 61999998888');return;}
+  if(tel.length<=11)tel='55'+tel;
+  contatos.push({nome:n,tel:tel});
+  salvarContatos();renderContatos();
+  document.getElementById('inNome').value='';
+  document.getElementById('inTel').value='';
+  falar('Contato '+n+' salvo!');
+}
+function removerContato(i){
+  var n=contatos[i].nome;
+  contatos.splice(i,1);salvarContatos();renderContatos();
+  falar('Contato '+n+' removido.');
+}
+async function importarAgenda(){
+  if(!('contacts'in navigator)||!('ContactsManager'in window)){
+    alert('Seu celular não permite importar a agenda. Adicione os contatos manualmente abaixo.');
+    return;
+  }
+  try{
+    var sel=await navigator.contacts.select(['name','tel'],{multiple:true});
+    var n=0;
+    sel.forEach(function(c){
+      if(c.name&&c.name[0]&&c.tel&&c.tel[0]){
+        var tel=c.tel[0].replace(/\D/g,'');
+        if(tel.length<=11)tel='55'+tel;
+        contatos.push({nome:c.name[0],tel:tel});n++;
+      }
+    });
+    salvarContatos();renderContatos();
+    falar(n+' contatos importados!');
+  }catch(e){}
+}
+
+/* ═══════════════════════════════════════════
+   INÍCIO
+   ═══════════════════════════════════════════ */
 function comecar(){
   localStorage.setItem('chico_v2','true');
   document.getElementById('welcome').classList.add('gone');
-  falar('Oiii! Eu sou o Chico! Seu amigo que te ajuda com tudo! Pode falar comigo que eu faço qualquer coisa!',function(){
+  falar('Oiii! Eu sou o Chico! Pode falar comigo que eu faço tudo! Experimenta dizer: pesquisa forró no YouTube!',function(){
     setTimeout(ouvir,600);
   });
 }
-
 window.addEventListener('load',function(){
   if(localStorage.getItem('chico_v2')==='true'){
     document.getElementById('welcome').classList.add('gone');
     falar('Oi! Chico de volta! Pode falar!',function(){setTimeout(ouvir,500);});
   }
 });
-
-/* Keep alive */
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'&&localStorage.getItem('chico_v2')==='true'){
-    setTimeout(ouvir,1500);
-  }
+    pausado=false;setTimeout(ouvir,1600);
+  }else{pararOuvir();}
 });
 history.pushState(null,'',location.href);
 window.addEventListener('popstate',function(){history.pushState(null,'',location.href);});
-if('wakeLock'in navigator){
-  navigator.wakeLock.request('screen').catch(function(){});
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')navigator.wakeLock.request('screen').catch(function(){});});
-}
+if('wakeLock'in navigator){navigator.wakeLock.request('screen').catch(function(){});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')navigator.wakeLock.request('screen').catch(function(){});});}
 if('speechSynthesis'in window)window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
-  });
-}
+if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}
 </script>
 </body>
 </html>
