@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0d1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chico">
+<link rel="manifest" href="manifest.json">
+<title>Chico</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#060a18;--bg1:#0e1530;--bg2:#1a2456;
+  --ac:#6d84f5;--ac2:#b4c4ff;--gold:#ffd94d;
+  --txt:#f0f4ff;--txt2:rgba(200,210,255,0.65);--txt3:rgba(140,160,255,0.35);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{height:100%;font-family:'Nunito',sans-serif;overflow:hidden;background:var(--bg0)}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;position:relative}
+
+/* ── STARS ── */
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.s{position:absolute;border-radius:50%;background:#fff;animation:tw var(--d,3s) ease-in-out var(--dl,0s) infinite}
+@keyframes tw{0%,100%{opacity:0.15}50%{opacity:0.9}}
+
+/* ── HEADER ── */
+.hdr{position:relative;z-index:2;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:14px 20px 6px}
+.hdr-logo{font-family:'Baloo 2',sans-serif;font-size:1.3rem;font-weight:800;background:linear-gradient(90deg,var(--ac2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-status{display:flex;align-items:center;gap:6px;font-size:0.7rem;font-weight:700;color:#4ade80;letter-spacing:0.04em}
+.hdr-status::before{content:'';width:7px;height:7px;border-radius:50%;background:#4ade80;animation:live 2s ease infinite}
+@keyframes live{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(74,222,128,0.5)}70%{opacity:0.7;box-shadow:0 0 0 6px rgba(74,222,128,0)}}
+
+/* ── STAGE ── */
+.stage{position:relative;z-index:2;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:4px 20px 0}
+
+/* ── PERSONAGEM PIXAR ── */
+.puppet-wrap{width:210px;height:230px;position:relative;animation:idle 4s cubic-bezier(0.45,0,0.55,1) infinite;transform-origin:50% 92%;cursor:pointer}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.st-talking .puppet-wrap{animation:talk-sq 0.44s cubic-bezier(0.36,0.07,0.19,0.97) infinite}
+@keyframes talk-sq{0%,100%{transform:translateY(0) scale(1,1) rotate(0)}35%{transform:translateY(-7px) scale(0.97,1.04) rotate(-1.2deg)}70%{transform:translateY(-2px) scale(1.02,0.98) rotate(0.8deg)}}
+.st-hearing .puppet-wrap{animation:lean 2s ease-in-out infinite}
+@keyframes lean{0%,100%{transform:rotate(0)}30%{transform:rotate(-6deg) translateY(-4px)}70%{transform:rotate(4deg) translateY(-2px)}}
+.st-happy .puppet-wrap{animation:jump 0.65s cubic-bezier(0.28,0.84,0.42,1) forwards}
+@keyframes jump{0%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-28px) scale(0.95,1.07)}55%{transform:translateY(2px) scale(1.06,0.93)}75%{transform:translateY(-10px) scale(0.98,1.03)}100%{transform:translateY(0) scale(1,1)}}
+
+.f-shadow{width:120px;height:16px;background:radial-gradient(ellipse,rgba(0,0,0,0.5),transparent 70%);border-radius:50%;margin-top:-10px;animation:sh 4s ease infinite}
+@keyframes sh{0%,100%{transform:scaleX(1)}50%{transform:scaleX(0.86)}}
+
+/* ── BALÃO ── */
+.balloon{
+  position:relative;max-width:320px;min-height:58px;
+  background:linear-gradient(160deg,#fff 0%,#eef2ff 100%);
+  border-radius:22px 22px 22px 6px;
+  padding:14px 20px;
+  font-size:1.08rem;font-weight:700;color:#1a2456;
+  line-height:1.45;text-align:center;
+  box-shadow:0 10px 40px rgba(0,0,0,0.4),0 2px 8px rgba(109,132,245,0.2),inset 0 -3px 0 rgba(26,36,86,0.07);
+  transition:background 0.4s;
+  margin-top:8px;
+}
+.st-hearing .balloon{background:linear-gradient(160deg,#fff9d6,#fff0a0)}
+.st-happy .balloon{background:linear-gradient(160deg,#d1fae5,#a7f3d0)}
+.pulse-dots{display:flex;gap:5px;justify-content:center;margin-top:8px;height:18px;opacity:0;transition:opacity 0.3s}
+.st-hearing .pulse-dots{opacity:1}
+.pd{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pd-a 0.7s ease infinite alternate}
+.pd:nth-child(2){animation-delay:0.2s}.pd:nth-child(3){animation-delay:0.4s}
+@keyframes pd-a{from{transform:scale(0.6);opacity:0.4}to{transform:scale(1.2);opacity:1}}
+
+/* ── APPS ── */
+.apps-section{position:relative;z-index:2;flex:1;overflow-y:auto;padding:14px 18px 20px;-webkit-overflow-scrolling:touch}
+.apps-section::-webkit-scrollbar{display:none}
+.sect-title{font-size:0.68rem;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:16px}
+.app{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:transform 0.14s ease}
+.app:active{transform:scale(0.82)}
+.app-ic{width:60px;height:60px;border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:1.85rem;box-shadow:0 4px 16px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.25)}
+.app-nm{font-size:0.65rem;font-weight:700;color:var(--txt2);text-align:center;line-height:1.2}
+/* cores premium */
+.g-yt{background:linear-gradient(145deg,#ff6b6b,#c4302b)}
+.g-wa{background:linear-gradient(145deg,#4dde80,#25d366)}
+.g-mp{background:linear-gradient(145deg,#60a5fa,#1a73e8)}
+.g-gg{background:linear-gradient(145deg,#f1f3f4,#e8eaed)}
+.g-sp{background:linear-gradient(145deg,#4ade80,#1db954)}
+.g-nf{background:linear-gradient(145deg,#374151,#111)}
+.g-if{background:linear-gradient(145deg,#ff6370,#ea1d2c)}
+.g-ig{background:linear-gradient(145deg,#feda75,#d62976 55%,#962fbf)}
+.g-tk{background:linear-gradient(145deg,#1e293b,#010101)}
+.g-ub{background:linear-gradient(145deg,#374151,#000)}
+.g-tg{background:linear-gradient(145deg,#67c8f5,#0088cc)}
+.g-ml{background:linear-gradient(145deg,#ffe566,#ffd100)}
+.g-am{background:linear-gradient(145deg,#febd69,#ff9900)}
+.g-gm{background:linear-gradient(145deg,#f6f6f6,#e8e8e8)}
+.g-nu{background:linear-gradient(145deg,#a855f7,#820ad1)}
+.g-wz{background:linear-gradient(145deg,#34d399,#059669)}
+.g-fb{background:linear-gradient(145deg,#60a5fa,#1877f2)}
+.g-hr{background:linear-gradient(145deg,#94a3b8,#475569)}
+.g-bt{background:linear-gradient(145deg,#86efac,#16a34a)}
+.g-cl{background:linear-gradient(145deg,#7dd3fc,#0ea5e9)}
+
+/* ── WELCOME ── */
+#welcome{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at 50% 40%,#1a2456,#060a18 80%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:36px 28px;text-align:center}
+#welcome.gone{display:none}
+.w-char{width:160px;height:170px;animation:idle 4s ease-in-out infinite}
+.w-hi{font-family:'Baloo 2',sans-serif;font-size:2rem;font-weight:800;color:#fff;line-height:1.2}
+.w-hi span{color:var(--gold)}
+.w-sub{font-size:1rem;color:var(--txt2);line-height:1.6;max-width:290px}
+.w-btn{background:var(--gold);color:#1a2456;border:none;border-radius:50px;padding:18px 52px;font-size:1.25rem;font-weight:800;font-family:'Baloo 2',sans-serif;cursor:pointer;box-shadow:0 8px 30px rgba(255,217,77,0.45);animation:w-pop 2s ease infinite;margin-top:4px}
+@keyframes w-pop{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.w-btn:active{transform:scale(0.94)}
+</style>
+</head>
+<body>
+
+<!-- ESTRELAS -->
+<div class="stars" id="stars"></div>
+
+<!-- BOAS-VINDAS -->
+<div id="welcome">
+  <svg class="w-char" viewBox="0 0 240 260">
+    <defs>
+      <radialGradient id="wh" cx="38%" cy="28%" r="85%"><stop offset="0%" stop-color="#9db4ff"/><stop offset="45%" stop-color="#6d84f5"/><stop offset="100%" stop-color="#3d4fc4"/></radialGradient>
+      <radialGradient id="wg" cx="50%" cy="40%" r="80%"><stop offset="0%" stop-color="#ffd94d"/><stop offset="100%" stop-color="#e8a800"/></radialGradient>
+      <filter id="wf"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <ellipse cx="120" cy="120" rx="105" ry="110" fill="#5468e8" opacity="0.12" filter="url(#wf)"/>
+    <rect x="116" y="14" width="8" height="26" rx="4" fill="#3d4fc4"/>
+    <circle cx="120" cy="12" r="10" fill="url(#wg)"><animate attributeName="opacity" values="1;0.5;1" dur="1.8s" repeatCount="indefinite"/></circle>
+    <ellipse cx="26" cy="96" rx="14" ry="18" fill="#3d4fc4"/><ellipse cx="214" cy="96" rx="14" ry="18" fill="#3d4fc4"/>
+    <rect x="32" y="34" width="176" height="126" rx="58" fill="url(#wh)"/>
+    <ellipse cx="92" cy="56" rx="52" ry="20" fill="#fff" opacity="0.22" filter="url(#wf)"/>
+    <rect x="52" y="56" width="136" height="86" rx="40" fill="#0c1230"/>
+    <ellipse cx="92" cy="96" rx="15" ry="16" fill="#5ee8ff"/><ellipse cx="92" cy="98" rx="7" ry="8" fill="#0c1230"/><circle cx="96" cy="91" r="4.5" fill="#fff"/><circle cx="88" cy="101" r="2" fill="#fff" opacity="0.7"/>
+    <ellipse cx="148" cy="96" rx="15" ry="16" fill="#5ee8ff"/><ellipse cx="148" cy="98" rx="7" ry="8" fill="#0c1230"/><circle cx="152" cy="91" r="4.5" fill="#fff"/><circle cx="144" cy="101" r="2" fill="#fff" opacity="0.7"/>
+    <path d="M 100 122 Q 120 134 140 122" stroke="#5ee8ff" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <ellipse cx="66" cy="116" rx="9" ry="6" fill="#ff7eb3" opacity="0.5"/><ellipse cx="174" cy="116" rx="9" ry="6" fill="#ff7eb3" opacity="0.5"/>
+    <rect x="66" y="158" width="108" height="70" rx="32" fill="#5468e8"/>
+    <rect x="88" y="172" width="64" height="38" rx="17" fill="#0c1230"/>
+    <circle cx="120" cy="191" r="11" fill="url(#wg)"><animate attributeName="opacity" values="1;0.5;1" dur="2.4s" repeatCount="indefinite"/></circle>
+    <rect x="38" y="166" width="26" height="52" rx="13" fill="#6d84f5"/><circle cx="51" cy="220" r="13" fill="#3d4fc4"/>
+    <rect x="176" y="166" width="26" height="52" rx="13" fill="#6d84f5"/><circle cx="189" cy="220" r="13" fill="#3d4fc4"/>
+    <ellipse cx="96" cy="240" rx="20" ry="12" fill="#2a3690"/><ellipse cx="144" cy="240" rx="20" ry="12" fill="#2a3690"/>
+  </svg>
+  <div class="w-hi">Oi! Eu sou o <span>Chico!</span></div>
+  <div class="w-sub">Sou seu amigo assistente. Vou te ajudar a usar qualquer app só com sua voz!</div>
+  <button class="w-btn" onclick="comecar()">COMEÇAR ✨</button>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-logo">Chico</div>
+    <div class="hdr-status">Ativo e ouvindo</div>
+  </div>
+
+  <div class="stage">
+    <!-- CHICO PIXAR -->
+    <div class="puppet-wrap" id="pw" onclick="toquePuppet()">
+      <svg viewBox="0 0 240 260" style="width:100%;height:100%">
+        <defs>
+          <radialGradient id="hM" cx="38%" cy="28%" r="85%"><stop offset="0%" stop-color="#9db4ff"/><stop offset="45%" stop-color="#6d84f5"/><stop offset="100%" stop-color="#3d4fc4"/></radialGradient>
+          <radialGradient id="bM" cx="40%" cy="25%" r="90%"><stop offset="0%" stop-color="#7d92fa"/><stop offset="55%" stop-color="#5468e8"/><stop offset="100%" stop-color="#3040ad"/></radialGradient>
+          <radialGradient id="vM" cx="50%" cy="35%" r="80%"><stop offset="0%" stop-color="#1e2a5e"/><stop offset="100%" stop-color="#0c1230"/></radialGradient>
+          <radialGradient id="eG" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#b5faff"/><stop offset="60%" stop-color="#5ee8ff"/><stop offset="100%" stop-color="#18b6d8"/></radialGradient>
+          <radialGradient id="aG" cx="50%" cy="40%" r="70%"><stop offset="0%" stop-color="#fff6c8"/><stop offset="55%" stop-color="#ffd94d"/><stop offset="100%" stop-color="#e8a800"/></radialGradient>
+          <filter id="fs"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+        <ellipse cx="120" cy="120" rx="105" ry="110" fill="#5468e8" opacity="0.1" filter="url(#fs)"/>
+        <rect x="116" y="14" width="8" height="26" rx="4" fill="#3d4fc4"/>
+        <circle cx="120" cy="12" r="10" fill="url(#aG)"><animate attributeName="opacity" values="1;0.55;1" dur="1.8s" repeatCount="indefinite"/></circle>
+        <circle cx="117" cy="9" r="3" fill="#fff" opacity="0.9"/>
+        <ellipse cx="26" cy="96" rx="14" ry="18" fill="#3d4fc4"/><ellipse cx="214" cy="96" rx="14" ry="18" fill="#3d4fc4"/>
+        <ellipse cx="24" cy="93" rx="7" ry="10" fill="#5ee8ff" opacity="0.4"/><ellipse cx="212" cy="93" rx="7" ry="10" fill="#5ee8ff" opacity="0.4"/>
+        <rect x="32" y="34" width="176" height="126" rx="58" fill="url(#hM)"/>
+        <ellipse cx="92" cy="56" rx="52" ry="20" fill="#fff" opacity="0.2" filter="url(#fs)"/>
+        <ellipse cx="120" cy="152" rx="70" ry="14" fill="#1a2456" opacity="0.22" filter="url(#fs)"/>
+        <rect x="52" y="56" width="136" height="86" rx="40" fill="url(#vM)"/>
+        <ellipse cx="95" cy="68" rx="38" ry="10" fill="#5ee8ff" opacity="0.07"/>
+        <g id="eL"><ellipse cx="92" cy="96" rx="15" ry="16" fill="url(#eG)"/><ellipse cx="92" cy="98" rx="7" ry="8" fill="#0c1230"/><circle cx="96" cy="91" r="4.5" fill="#fff"/><circle cx="88" cy="101" r="2" fill="#fff" opacity="0.7"/></g>
+        <g id="eR"><ellipse cx="148" cy="96" rx="15" ry="16" fill="url(#eG)"/><ellipse cx="148" cy="98" rx="7" ry="8" fill="#0c1230"/><circle cx="152" cy="91" r="4.5" fill="#fff"/><circle cx="144" cy="101" r="2" fill="#fff" opacity="0.7"/></g>
+        <path id="mouth" d="M 100 122 Q 120 134 140 122" stroke="#5ee8ff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <ellipse cx="66" cy="116" rx="9" ry="6" fill="#ff7eb3" opacity="0.5"/><ellipse cx="174" cy="116" rx="9" ry="6" fill="#ff7eb3" opacity="0.5"/>
+        <rect x="66" y="158" width="108" height="70" rx="32" fill="url(#bM)"/>
+        <ellipse cx="100" cy="172" rx="30" ry="10" fill="#fff" opacity="0.14" filter="url(#fs)"/>
+        <rect x="88" y="172" width="64" height="38" rx="17" fill="url(#vM)"/>
+        <circle cx="120" cy="191" r="11" fill="url(#aG)"><animate attributeName="opacity" values="1;0.5;1" dur="2.4s" repeatCount="indefinite"/></circle>
+        <rect x="38" y="166" width="26" height="52" rx="13" fill="url(#hM)"/><circle cx="51" cy="220" r="13" fill="#3d4fc4"/>
+        <rect x="176" y="166" width="26" height="52" rx="13" fill="url(#hM)"/><circle cx="189" cy="220" r="13" fill="#3d4fc4"/>
+        <ellipse cx="96" cy="240" rx="20" ry="12" fill="#2a3690"/><ellipse cx="144" cy="240" rx="20" ry="12" fill="#2a3690"/>
+        <ellipse cx="92" cy="236" rx="10" ry="5" fill="#5468e8" opacity="0.55"/><ellipse cx="140" cy="236" rx="10" ry="5" fill="#5468e8" opacity="0.55"/>
+      </svg>
+    </div>
+    <div class="f-shadow"></div>
+    <div class="balloon" id="bal">Oi! Pode falar comigo! 💜</div>
+    <div class="pulse-dots"><div class="pd"></div><div class="pd"></div><div class="pd"></div></div>
+  </div>
+
+  <!-- APPS -->
+  <div class="apps-section">
+    <div class="sect-title">Toque em qualquer app ou fale com o Chico</div>
+    <div class="grid">
+      <div class="app" onclick="cmd('Abrir YouTube')"><div class="app-ic g-yt">▶️</div><div class="app-nm">YouTube</div></div>
+      <div class="app" onclick="cmd('Abrir WhatsApp')"><div class="app-ic g-wa">💬</div><div class="app-nm">WhatsApp</div></div>
+      <div class="app" onclick="cmd('Navegar até o hospital')"><div class="app-ic g-mp">🗺️</div><div class="app-nm">Navegar</div></div>
+      <div class="app" onclick="cmd('Pesquisar no Google')"><div class="app-ic g-gg">🔍</div><div class="app-nm">Google</div></div>
+      <div class="app" onclick="cmd('Abrir Spotify')"><div class="app-ic g-sp">🎵</div><div class="app-nm">Spotify</div></div>
+      <div class="app" onclick="cmd('Abrir Netflix')"><div class="app-ic g-nf">🎬</div><div class="app-nm">Netflix</div></div>
+      <div class="app" onclick="cmd('Abrir iFood')"><div class="app-ic g-if">🍔</div><div class="app-nm">iFood</div></div>
+      <div class="app" onclick="cmd('Abrir Instagram')"><div class="app-ic g-ig">📸</div><div class="app-nm">Instagram</div></div>
+      <div class="app" onclick="cmd('Abrir TikTok')"><div class="app-ic g-tk">🎭</div><div class="app-nm">TikTok</div></div>
+      <div class="app" onclick="cmd('Abrir Uber')"><div class="app-ic g-ub">🚗</div><div class="app-nm">Uber</div></div>
+      <div class="app" onclick="cmd('Abrir Telegram')"><div class="app-ic g-tg">✈️</div><div class="app-nm">Telegram</div></div>
+      <div class="app" onclick="cmd('Abrir Mercado Livre')"><div class="app-ic g-ml">🛒</div><div class="app-nm">M. Livre</div></div>
+      <div class="app" onclick="cmd('Abrir Amazon')"><div class="app-ic g-am">📦</div><div class="app-nm">Amazon</div></div>
+      <div class="app" onclick="cmd('Abrir Gmail')"><div class="app-ic g-gm">📧</div><div class="app-nm">Gmail</div></div>
+      <div class="app" onclick="cmd('Abrir Nubank')"><div class="app-ic g-nu">💜</div><div class="app-nm">Nubank</div></div>
+      <div class="app" onclick="cmd('Abrir Waze')"><div class="app-ic g-wz">🚙</div><div class="app-nm">Waze</div></div>
+      <div class="app" onclick="cmd('Abrir Facebook')"><div class="app-ic g-fb">👥</div><div class="app-nm">Facebook</div></div>
+      <div class="app" onclick="cmd('Que horas são')"><div class="app-ic g-hr">⏰</div><div class="app-nm">Hora</div></div>
+      <div class="app" onclick="cmd('Qual minha bateria')"><div class="app-ic g-bt">🔋</div><div class="app-nm">Bateria</div></div>
+      <div class="app" onclick="cmd('Previsão do tempo hoje')"><div class="app-ic g-cl">☁️</div><div class="app-nm">Clima</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════ ESTRELAS ══════ */
+(function(){
+  var c=document.getElementById('stars');
+  for(var i=0;i<55;i++){
+    var el=document.createElement('div');el.className='s';
+    var sz=(Math.random()*2.2+0.8).toFixed(1);
+    var dl=(Math.random()*4).toFixed(2);
+    var dur=(Math.random()*3+2).toFixed(1);
+    el.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*100).toFixed(1)+'%;--d:'+dur+'s;--dl:'+dl+'s';
+    c.appendChild(el);
+  }
+})();
+
+/* ══════ REFS ══════ */
+var bal=document.getElementById('bal');
+var mouth=document.getElementById('mouth');
+var eL=document.getElementById('eL'),eR=document.getElementById('eR');
+var pw=document.getElementById('pw');
+var st=document.getElementById('app'); // usaremos o stage via classe no #app não, criaremos classe no stage
+var stage={el:document.querySelector('.stage')};
+var mTimer=null;
+
+/* ══════ MODO ══════ */
+function modo(m){
+  stage.el.className='stage'+(m?' st-'+m:'');
+}
+
+/* ══════ PISCAR OLHOS ══════ */
+setInterval(function(){
+  if(Math.random()>0.35){
+    eL.style.transform='scaleY(0.07)';eR.style.transform='scaleY(0.07)';
+    eL.style.transformOrigin='92px 96px';eR.style.transformOrigin='148px 96px';
+    eL.style.transition='transform 0.07s';eR.style.transition='transform 0.07s';
+    setTimeout(function(){eL.style.transform='';eR.style.transform='';eL.style.transition='';eR.style.transition='';},140);
+  }
+},2800);
+
+/* ══════ BOCA ══════ */
+var bocaAberta=['M 96 118 Q 120 142 144 118 Q 120 130 96 118','M 104 120 Q 120 138 136 120 Q 120 128 104 120','M 102 122 Q 120 140 138 122 Q 120 130 102 122'];
+var bocaF='M 100 122 Q 120 134 140 122';
+function bocaTalk(on){
+  if(mTimer){clearInterval(mTimer);mTimer=null;}
+  if(on){
+    var s=0;
+    mTimer=setInterval(function(){
+      s=(s+1)%bocaAberta.length;
+      mouth.setAttribute('d',bocaAberta[s]);
+      mouth.setAttribute('fill','#5ee8ff');
+    },145);
+  } else {
+    mouth.setAttribute('d',bocaF);
+    mouth.setAttribute('fill','none');
+  }
+}
+
+/* ══════ VOZ PIXAR ══════ */
+function bestVoice(){
+  var v=window.speechSynthesis.getVoices();
+  var pref=['google português do brasil','luciana','francisca','pt-br'];
+  for(var p=0;p<pref.length;p++){
+    for(var i=0;i<v.length;i++){
+      if(v[i].lang.toLowerCase().indexOf('pt')===0&&v[i].name.toLowerCase().indexOf(pref[p])>=0)return v[i];
+    }
+  }
+  for(var i=0;i<v.length;i++){if(v[i].lang.toLowerCase().indexOf('pt-br')===0)return v[i];}
+  for(var i=0;i<v.length;i++){if(v[i].lang.toLowerCase().indexOf('pt')===0)return v[i];}
+  return null;
+}
+
+function falar(t,cb){
+  bal.textContent=t;
+  if(!('speechSynthesis' in window)){if(cb)cb();return;}
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(t);
+  u.lang='pt-BR';
+  u.pitch=1.65;  // VOZ DE CRIANÇA MASCULINA
+  u.rate=1.05;
+  var v=bestVoice();if(v)u.voice=v;
+  modo('talking');bocaTalk(true);
+  u.onend=function(){bocaTalk(false);modo('');if(cb)cb();};
+  u.onerror=function(){bocaTalk(false);modo('');if(cb)cb();};
+  window.speechSynthesis.speak(u);
+}
+
+/* ══════ RECONHECIMENTO ══════ */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var rec=null,ouvindo=false;
+
+function ouvir(){
+  if(!SR||ouvindo)return;
+  try{
+    rec=new SR();rec.lang='pt-BR';rec.interimResults=true;rec.maxAlternatives=1;
+    rec.onstart=function(){ouvindo=true;modo('hearing');bal.textContent='Estou te ouvindo... 👂';};
+    rec.onresult=function(e){
+      var t='';
+      for(var i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal)t+=e.results[i][0].transcript;
+        else bal.textContent='"'+e.results[i][0].transcript+'"';
+      }
+      if(t){pararOuvir();processar(t.trim());}
+    };
+    rec.onerror=function(){pararOuvir();setTimeout(ouvir,2500);};
+    rec.onend=function(){if(ouvindo){pararOuvir();setTimeout(ouvir,1200);}};
+    rec.start();
+  }catch(e){setTimeout(ouvir,3000);}
+}
+
+function pararOuvir(){
+  ouvindo=false;
+  if(rec){try{rec.stop();}catch(e){}rec=null;}
+}
+
+function toquePuppet(){
+  if(!ouvindo&&!pw._falando){
+    var frases=['Oi! Pode falar!','Estou aqui!','Me chama! 😄','Pode falar comigo!'];
+    falar(frases[Math.floor(Math.random()*frases.length)],function(){setTimeout(ouvir,600);});
+  }
+}
+
+function cmd(t){pararOuvir();processar(t);}
+
+/* ══════ PROCESSADOR ══════ */
+function processar(txt){
+  var c=txt.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  var r='',url='';
+
+  if(c.indexOf('youtube')>=0){var q=txt.replace(/.*youtube\s*(music\s*)?(e\s*)?(pesquis[ae]|toca[r]?|busca[r]?|play)?\s*/i,'').trim();if(c.indexOf('music')>=0||c.indexOf('musica')>=0){r='Vou tocar "'+(q||'músicas')+'" pra você!';url='https://music.youtube.com/search?q='+encodeURIComponent(q||'musicas');}else{r='Procurando "'+(q||'vídeos')+'" no YouTube!';url='https://www.youtube.com/results?search_query='+encodeURIComponent(q||'');}}
+  else if(c.indexOf('spotify')>=0){var q=txt.replace(/.*spotify\s*(e\s*)?(toca[r]?|play|busca[r]?)?\s*/i,'').trim();r=q?'Tocando "'+q+'" no Spotify!':'Abrindo Spotify!';url=q?'https://open.spotify.com/search/'+encodeURIComponent(q):'https://open.spotify.com';}
+  else if(c.indexOf('whatsapp')>=0||c.indexOf('zap')>=0){var n=extrairNome(txt,c);r=n?'Abrindo WhatsApp para '+n+'!':'Abrindo WhatsApp!';url='https://wa.me/';}
+  else if(c.indexOf('instagram')>=0){r='Abrindo Instagram!';url='https://www.instagram.com/';}
+  else if(c.indexOf('facebook')>=0){r='Abrindo Facebook!';url='https://www.facebook.com/';}
+  else if(c.indexOf('tiktok')>=0){var q=txt.replace(/.*tiktok\s*(e\s*)?(busca[r]?)?\s*/i,'').trim();r=q?'Pesquisando "'+q+'" no TikTok!':'Abrindo TikTok!';url=q?'https://www.tiktok.com/search?q='+encodeURIComponent(q):'https://www.tiktok.com/';}
+  else if(c.indexOf('netflix')>=0){var q=txt.replace(/.*netflix\s*(e\s*)?(busca[r]?|assisti[r]?)?\s*/i,'').trim();r=q?'Procurando "'+q+'" na Netflix!':'Abrindo Netflix!';url=q?'https://www.netflix.com/search?q='+encodeURIComponent(q):'https://www.netflix.com/';}
+  else if(c.indexOf('ifood')>=0||c.indexOf('pedir comida')>=0){var q=txt.replace(/.*?(ifood|pedir comida)\s*(e\s*)?(busca[r]?|pedir)?\s*/i,'').trim();r=q?'Que fome! Procurando "'+q+'"!':'Abrindo iFood!';url=q?'https://www.ifood.com.br/busca?term='+encodeURIComponent(q):'https://www.ifood.com.br/';}
+  else if(c.indexOf('uber')>=0){r='Chamando o Uber!';url='https://m.uber.com/ul/';}
+  else if(c.indexOf('waze')>=0){var d=txt.replace(/.*waze\s*(e\s*)?(ir\s+at[eé]|para)?\s*/i,'').trim();r='Abrindo Waze'+(d?' para "'+d+'"':'')+'!';url='https://waze.com/ul?q='+encodeURIComponent(d)+'&navigate=yes';}
+  else if(c.indexOf('navegar')>=0||c.indexOf('como chegar')>=0||c.indexOf('onde fica')>=0||c.indexOf('maps')>=0||c.indexOf('rota')>=0){var d=txt.replace(/(abrir?\s*maps?\s*e?\s*)?(navegar?\s*at[eé]\s*|como\s+chegar\s+(at[eé]\s*)?|onde\s+fica\s+|ir\s+(at[eé]\s*)?|rota\s+para\s*)/i,'').trim();r='Te levando até "'+(d||'lá')+'", um momento!';url='https://maps.google.com/maps?q='+encodeURIComponent(d);}
+  else if(c.indexOf('google')>=0||c.indexOf('pesquis')>=0||c.indexOf('busca')>=0){var q=txt.replace(/(pesquis[ae]?\s*(no\s*google)?\s*)|(abrir?\s*google\s*(e\s*)?pesquis[ae]?\s*)/i,'').trim();r='Pesquisando "'+(q||txt)+'" no Google!';url='https://www.google.com/search?q='+encodeURIComponent(q||txt);}
+  else if(c.indexOf('gmail')>=0||c.indexOf('email')>=0){r='Abrindo seus e-mails!';url='https://mail.google.com/';}
+  else if(c.indexOf('nubank')>=0){r='Abrindo Nubank!';url='https://app.nubank.com.br/';}
+  else if(c.indexOf('mercado livre')>=0){var q=txt.replace(/.*mercado\s*livre\s*(e\s*)?(busca[r]?)?\s*/i,'').trim();r=q?'Procurando "'+q+'" no Mercado Livre!':'Abrindo Mercado Livre!';url=q?'https://lista.mercadolivre.com.br/'+encodeURIComponent(q.replace(/ /g,'-')):'https://www.mercadolivre.com.br/';}
+  else if(c.indexOf('amazon')>=0){var q=txt.replace(/.*amazon\s*(e\s*)?(busca[r]?)?\s*/i,'').trim();r=q?'Procurando "'+q+'" na Amazon!':'Abrindo Amazon!';url=q?'https://www.amazon.com.br/s?k='+encodeURIComponent(q):'https://www.amazon.com.br/';}
+  else if(c.indexOf('telegram')>=0){r='Abrindo Telegram!';url='https://web.telegram.org/';}
+  else if(c.indexOf('linkedin')>=0){r='Abrindo LinkedIn!';url='https://www.linkedin.com/';}
+  else if(c.indexOf('clima')>=0||c.indexOf('tempo')>=0||c.indexOf('chuva')>=0||c.indexOf('previsao')>=0){var l=txt.replace(/.*?(clima|tempo|previsao|chuva)\s*(de|em|para|hoje)?\s*/i,'').trim();r='Deixa eu ver o tempo'+(l?' em "'+l+'"':'')+'!';url='https://www.google.com/search?q=previsao+do+tempo+'+encodeURIComponent(l||'hoje');}
+  else if(c.indexOf('hora')>=0||c.indexOf('que horas')>=0){r='Agora são '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'!';}
+  else if(c.indexOf('data')>=0||c.indexOf('que dia')>=0||c.indexOf('hoje')>=0){r='Hoje é '+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})+'!';}
+  else if(c.indexOf('bateria')>=0||c.indexOf('carga')>=0){
+    if(navigator.getBattery){
+      navigator.getBattery().then(function(b){
+        falar('A bateria está em '+Math.round(b.level*100)+' por cento'+(b.charging?', e está carregando!':'!'),function(){setTimeout(ouvir,700);});
+      });return;
+    }else{r='Não consegui ler a bateria aqui.';}
+  }
+  else if(c.indexOf('calcular')>=0||c.indexOf('quanto e')>=0){var ex=txt.replace(/.*?(calcular?|quanto e)\s*/i,'').trim();if(ex){try{var res=Function('"use strict"; return ('+ex.replace(/[^0-9+\-*/.() ]/g,'')+')')();r='A resposta é '+res+'!';}catch(e){r='Hmm, não entendi a conta. Tenta de novo!';}}else{r='Me fala a conta! Tipo: calcular 50 mais 30!';}}
+  else if(c.indexOf('obrigad')>=0||c.indexOf('valeu')>=0||c.indexOf('thank')>=0){r='De nada! Tô sempre aqui pra te ajudar! 💜';}
+  else if(c.indexOf('oi')===0||c.indexOf('ola')===0||c.indexOf('bom dia')>=0||c.indexOf('boa tarde')>=0||c.indexOf('boa noite')>=0){r='Oiii!! Que bom te ouvir! O que você quer fazer?';}
+  else if(c.indexOf('quem e voce')>=0||c.indexOf('seu nome')>=0||c.indexOf('como voce se chama')>=0){r='Eu sou o Chico! Seu amigo que te ajuda com o celular! 🤖';}
+  else{r='Hmm, não entendi bem. Tenta falar: "abrir YouTube", "navegar até a farmácia", ou "que horas são"!';}
+
+  falar(r,function(){
+    if(url){setTimeout(function(){window.open(url,'_blank');},300);}
+    setTimeout(ouvir,800);
+  });
+}
+
+function extrairNome(orig,c){
+  var m=orig.match(/(?:para|pro|pra)\s+([A-ZÀ-Ú][a-zà-ú]+)/);
+  return m?m[1]:null;
+}
+
+/* ══════ INÍCIO ══════ */
+function comecar(){
+  localStorage.setItem('chico_v2','true');
+  document.getElementById('welcome').classList.add('gone');
+  falar('Oiii! Eu sou o Chico! Seu amigo que te ajuda com tudo! Pode falar comigo que eu faço qualquer coisa!',function(){
+    setTimeout(ouvir,600);
+  });
+}
+
+window.addEventListener('load',function(){
+  if(localStorage.getItem('chico_v2')==='true'){
+    document.getElementById('welcome').classList.add('gone');
+    falar('Oi! Chico de volta! Pode falar!',function(){setTimeout(ouvir,500);});
+  }
+});
+
+/* Keep alive */
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'&&localStorage.getItem('chico_v2')==='true'){
+    setTimeout(ouvir,1500);
+  }
+});
+history.pushState(null,'',location.href);
+window.addEventListener('popstate',function(){history.pushState(null,'',location.href);});
+if('wakeLock'in navigator){
+  navigator.wakeLock.request('screen').catch(function(){});
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')navigator.wakeLock.request('screen').catch(function(){});});
+}
+if('speechSynthesis'in window)window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices();};
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
